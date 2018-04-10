@@ -162,18 +162,12 @@ def shared_data_maker(element):
 
     This version uses mpi4py to share data and supports a single downstream node.
 
-    The element provides a serialized argument list for numpy.empty() as two elements, args, and kwargs. Each subscriber receives such
+    The element provides an argument list for numpy.empty().
+
+    Each subscriber receives such
     an array at launch along with a python function handle to call-back to at some interval (passed to
     the plugin C++ code).
     """
-
-    # New idea: Instead of being dependent on a shared data node, let participants add a downstream node
-    # that performs the reduce operation. A context can determine unsuitability for this parallelism with
-    # lack of support for a reduce with a period less than the length of the specified trajectories.
-    # To support reduce operations for ensembles wider than the Context, the Context could provide an
-    # additional tier in the reduction for batches of co-scheduled tasks.
-
-    import json
 
     class Builder(object):
         def __init__(self, element):
@@ -188,9 +182,7 @@ def shared_data_maker(element):
             # Params contains a dictionary of kwargs
             logger.debug("Processing parameters {}".format(params))
             assert isinstance(params, dict)
-            kwargs = {name: params[name] for name in params}
-            self.args = kwargs['args']
-            self.kwargs = kwargs['kwargs']
+            self.kwargs = {name: params[name] for name in params}
 
             # The builder can hold an updater to be provided to the subscriber at launch. The updater is
             # a function reference that the user provides to perform a desired periodic action. Not sure
@@ -230,7 +222,9 @@ def shared_data_maker(element):
             the shared data facility.
             """
             import numpy
-            data = numpy.empty(*self.args, **self.kwargs)
+            shape = self.kwargs['shape']
+            kwargs = {key: value for key, value in self.kwargs.items() if key != 'shape'}
+            data = numpy.empty(shape=shape, **kwargs)
             self.node['data'] = data
             self.subscriber.shared_data_updater = self.updater
             self.subscribinging_ranks = list(range(self.subscriber.width))

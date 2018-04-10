@@ -1,5 +1,5 @@
 # Test 2-element work array. Run with ``mpiexec -n 2 python -m mpi4py thisfile.py``
-# mpiexec -n 2 python -m mpi4py -m pytest -v -rs --pyargs gmx.test.test_mpiarraycontext
+# mpiexec -n 2 python -m mpi4py -m pytest -v -rs --pyargs gmx
 
 import unittest
 import pytest
@@ -27,6 +27,8 @@ try:
                                       reason="Test requires at least 2 MPI ranks, but MPI is not initialized or too small.")
 except ImportError:
     withmpi_only = pytest.mark.skip(reason="Test requires at least 2 MPI ranks, but mpi4py is not available.")
+except Exception as e:
+    raise e
 
 class ConsumerElement(gmx.workflow.WorkElement):
     """Simple workflow element to test the shared data resource."""
@@ -158,10 +160,9 @@ class ArrayContextTestCase(unittest.TestCase):
         """Test that a shared data facility can be used across an ensemble."""
 
         # constructor arguments for numpy.empty()
-        args = [(10,3)]
-        kwargs = {'dtype': 'int'}
+        kwargs = {'shape': [10, 3], 'dtype': 'int'}
 
-        data = gmx.workflow.SharedDataElement({'args': args, 'kwargs': kwargs}, name='mydata')
+        data = gmx.workflow.SharedDataElement(name='mydata', **kwargs)
 
         # Make a consumer of width 3, which we expect to be too big since we typically test on 2 ranks.
         width = 3

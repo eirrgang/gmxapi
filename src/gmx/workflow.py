@@ -447,19 +447,17 @@ class SharedDataElement(WorkElement):
 
     The schema may not need to be changed, but the API object may be expected to provide additional functionality.
     """
-    def __init__(self, params, name=None):
+    def __init__(self, name=None, **params):
         """Create a blank SharedDataElement representation.
 
         It may be appropriate to insist on creating objects of this type via helpers or factories, particularly if
         creation requires additional parameters.
         """
-        self.args = params['args']
-        self.kwargs = params['kwargs']
+        self.kwargs = {str(key): params[key] for key in params}
         super(SharedDataElement, self).__init__(namespace="gmxapi",
                                                 operation="global_data",
-                                                params={'args': self.args, 'kwargs': self.kwargs})
+                                                params=self.kwargs)
         self.name = name
-
 
 def get_source_elements(workspec):
     """Get an iterator of the starting nodes in the work spec.
