@@ -12,6 +12,7 @@ find_package(gmxapi 0.0.6 REQUIRED
              )
 
 # Build the C++ extension
+include_directories(${PYTHON_INCLUDE_DIRS})
 
 pybind11_add_module(pygmx_core
                     core.h
@@ -43,8 +44,7 @@ set_target_properties(pygmx_core PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BIN
 
 target_include_directories(pygmx_core PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
-    )
+    ${CMAKE_CURRENT_BINARY_DIR})
 
 # RPATH management
 #set(PYGMX_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}" CACHE PATH
@@ -73,6 +73,6 @@ endif()
 set_target_properties(pygmx_core PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 install(TARGETS pygmx_core
-        LIBRARY DESTINATION ${GMXAPI_INSTALL_PATH}
-        ARCHIVE DESTINATION ${GMXAPI_INSTALL_PATH}
-        RUNTIME DESTINATION ${GMXAPI_INSTALL_PATH})
+        LIBRARY DESTINATION gmx
+        ARCHIVE DESTINATION gmx
+        RUNTIME DESTINATION gmx)
