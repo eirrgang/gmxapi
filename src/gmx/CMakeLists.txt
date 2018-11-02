@@ -26,10 +26,14 @@ set(_test_sources
         test/test_pymd.py
         test/test_workflow.py
         )
+set(_workspec_0_2
+        _workspec_0_2/__init__.py
+        _workspec_0_2/util.py
+        )
 set(_data_sources
         data/topol.tpr
         )
-set(GMXAPI_PY_STATIC_FILENAMES ${_pure_sources} ${_test_sources} ${_data_sources}
+set(GMXAPI_PY_STATIC_FILENAMES ${_pure_sources} ${_test_sources} ${_data_sources} ${_workspec_0_2}
         PARENT_SCOPE
         )
 set(GMXAPI_PY_GENERATED_FILENAMES
@@ -52,4 +56,7 @@ install(FILES ${_test_sources}
         )
 install(FILES ${_data_sources}
         DESTINATION ${GMXAPI_INSTALL_PATH}/data
+        )
+install(FILES ${_workspec_0_2}
+        DESTINATION ${GMXAPI_INSTALL_PATH}/_workspec_0_2
         )

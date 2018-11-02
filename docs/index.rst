@@ -18,7 +18,7 @@ For the most up-to-date documentation, download the source code from
     quickstart
     userguide
     developerguide
-    changelog
+    updates
 
 .. seealso::
 
