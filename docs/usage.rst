@@ -11,7 +11,17 @@ For full documentation of the Python-level interface and API, use the ``pydoc``
 command line tool or the ``help()`` interactive Python function, or refer to
 the :ref:`python-procedural` documentation.
 
-Once the ``gmxapi`` package is installed, running simulations is easy with :func:`gmx.workflow.from_tpr` and
+Python does not wrap any command-line tool, so once installation is complete,
+there shouldn't be any additional configuration necessary, and any errors that
+occur should be caught at the Python level. Exceptions should all be descendants
+of :class:`gmx.exceptions.Error`.
+
+Running simulations
+===================
+
+Once the ``gmxapi`` package is installed, running simulations is easy.
+
+To use an existing run input file, use :func:`gmx.workflow.from_tpr` and
 :func:`gmx.run`.::
 
     import gmx
@@ -35,10 +45,8 @@ when you create the MD work element.::
                                pme_ranks=2,
                                threads_per_rank=1)
 
-Python does not wrap a command-line tool, so once installation is complete,
-there shouldn't be any additional configuration necessary, and any errors that
-occur should be caught at the Python level. Exceptions should all be descendants
-of :class:`gmx.exceptions.Error`.
+Plugins
+=======
 
 If you have written plugins or if you have downloaded and built the
 `sample <https://github.com/kassonlab/sample_restraint>`_ plugin, you attach it
