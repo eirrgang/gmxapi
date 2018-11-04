@@ -46,7 +46,7 @@ when you create the MD work element.::
                                threads_per_rank=1)
 
 Plugins
-=======
+-------
 
 If you have written plugins or if you have downloaded and built the
 `sample <https://github.com/kassonlab/sample_restraint>`_ plugin, you attach it
@@ -75,3 +75,122 @@ for an additional example of an ensemble-restraint biasing potential that
 accumulates statistics from several trajectories in parallel to refine a
 pair restraint to bias for a target distribution.
 
+The work graph
+--------------
+
+named inputs and outputs...
+
+Parallelism
+-----------
+
+gmxapi manages parallelism at the level of the work graph, as well as utilizing
+native GROMACS parallelism.
+
+Synchronous and asynchronous work
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+gmxapi can run arrays of simulations simultaneously using MPI.
+
+If launched with ``mpiexec``, runs arrays of simulations across the MPI ranks.
+If the simulations are coupled, such as when running an ensemble of trajectories,
+gmxapi manages synchronization. If synchronous operations are not necessary,
+gmxapi may run simulations sequentially, managing resources as best it can.
+
+Data events represented at the level of the work graph are synchronized by the
+Session scheduler (e.g. simulation input preparation or operation output).
+Data exchange may occur without session-level synchronization through lower level
+interfaces.
+
+Accelerated computation
+^^^^^^^^^^^^^^^^^^^^^^^
+
+GROMACS uses OpenMP, "thread-MPI", or MPI to parallelize accelerate molecular
+simulation, depending on how the GROMACS installation was compiled. gmxapi
+clients can share some of the parallel resources.
+
+The global MPI communicator is available to Python scripts through ``mpi4py``.
+
+MD plugins automatically use domain decomposition within the GROMACS simulation.
+
+For trajectory-ensemble simulations, plugin code on each simulation master rank
+can communicate with other ensemble members through session resources.
+
+Simulation input
+================
+
+Preparing simulation input
+--------------------------
+
+Instead of ``gmx.workflow.from_tpr()``, simulation input can be prepared more
+directly.
+
+.. autofunction:: gmx.make_input
+
+Manipulating simulation parameters
+----------------------------------
+
+With key word arguments
+^^^^^^^^^^^^^^^^^^^^^^^
+
+With work graph operations
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Accessing trajectory data
+=========================
+
+From files
+----------
+
+Create the Python proxy to the caching ``gmx::TrajectoryAnalysisModule`` object.
+::
+
+    # filename = sys.argv[1]
+    mytraj = gmx.fileio.TrajectoryFile(filename, 'r')
+
+From in-memory objects
+----------------------
+
+Implicitly create the Runner object and get an iterator based on selection::
+
+    frames = mytraj.select(...)
+
+Iterating on the module advances the Runner.
+Since the Python interpreter is explicitly asking for data,
+the runner must now be initialized and begin execution. E.g.::
+
+    mytraj.runner.initialize(context, options)
+    mytraj.runner.next()
+
+Example::
+
+    frames = mytraj.select('real selections not yet implemented')
+    try:
+        frame = next(frames)
+        print(frame)
+        print(frame.position)
+        print(frame.position.extract())
+        print("{} atoms in frame".format(frame.position.extract().N))
+        print(numpy.array(frame.position.extract(), copy=False))
+    except StopIteration:
+        print("no frames")
+
+Subsequent iterations only need to step the runner and return a frame.::
+
+    for frame in frames:
+        print(frame.position.extract())
+
+The generator yielding frames has finished, so the runner has been released.
+The module caching the frames still exists and could still be accessed or
+given to a new runner with a new selection.
+::
+
+    for frame in mytraj.select(...):
+        # do some other stuff
+
+
+From gmxapi operation results
+-----------------------------
+
+Trajectory data results from API operations can either be passed by reference to
+other API operations or extracted to the local environment for inspection or
+manipulation. To get a local in-memory object from a gmxapi trajectory data stream...

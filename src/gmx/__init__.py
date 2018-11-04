@@ -59,7 +59,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-__all__ = ['get_context', 'run']
+__all__ = ['get_context', 'run', 'make_input']
 
 # Import system facilities
 import logging
@@ -102,6 +102,18 @@ def run(work=None):
         status = session.run()
     return status
 
+
+def make_input(structure=None, topology=None, simulation_parameters=None, params=None):
+    """Establish a source of simulation inputs.
+
+    Args:
+        structure:
+        topology:
+        simulation_parameters (dict):
+        params (dict):
+
+    """
+    pass
 
 # if __name__ == "__main__":
 #     import doctest
