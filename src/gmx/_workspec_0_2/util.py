@@ -1,5 +1,6 @@
 """
-
+:py:mod:`gmx._workspec_0_2.util` provides utility functions used in the
+:py:mod:`gmx._workspec_0_2` package.
 """
 
 from __future__ import absolute_import
@@ -9,8 +10,8 @@ from __future__ import unicode_literals
 
 import sys
 import os
-
-__all__ = []
+#
+# __all__ = []
 
 from gmx.exceptions import UsageError
 from gmx.exceptions import FileError
@@ -18,7 +19,7 @@ from gmx.exceptions import FileError
 def to_utf8(input):
     """Return a utf8 encoded byte sequence of the Unicode ``input`` or its string representation.
 
-    In Python 2, returns a :py:str object. In Python 3, returns a :py:bytes object.
+    In Python 2, returns a ``str`` object. In Python 3, returns a ``bytes`` object.
     """
     py_version = sys.version_info.major
     if py_version == 3:
@@ -53,8 +54,8 @@ def to_string(input):
     In Python 2, returns a Unicode object, converting data types if necessary and possible.
 
     Note:
-        In Python 2, byte sequence objects are :py:str type, so passing a :py:str actually converts from :py:str: to
-        :py:unicode. To guarantee a native string object, wrap the output of this function in ``str()``.
+        In Python 2, byte sequence objects are :py:str type, so passing a ``str`` actually converts from ``str`` to
+        ``unicode``. To guarantee a native string object, wrap the output of this function in ``str()``.
     """
     py_version = sys.version_info.major
     if py_version == 3:

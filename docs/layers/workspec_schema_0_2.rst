@@ -94,8 +94,17 @@ An element can not depend on another element that is not in the work specificati
 Dependency direction affects sequencing of Director calls when launching a session, but also may be used at some point
 to manage checkpoints or data flow state checks at a higher level than the execution graph.
 
-Details
-=======
+Middleware API
+==============
 
-.. automodule:: gmx._workspec_0_2
+Specification
+-------------
+
+..  automodule:: gmx._workspec_0_2
+    :members:
+
+Helpers
+-------
+
+..  automodule:: gmx._workspec_0_2.util
     :members:
