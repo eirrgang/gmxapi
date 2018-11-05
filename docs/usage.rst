@@ -57,18 +57,23 @@ example applies a harmonic spring restraint between atoms 1 and 4::
 
     import gmx
     import myplugin
-    assert gmx.version.is_at_least(0,0,6)
+    assert gmx.version.is_at_least(0,0,8)
 
     md = gmx.workflow.from_tpr([tpr_filename])
     params = {'sites': [1, 4],
               'R0': 2.0,
               'k': 10000.0}
-    potential_element = gmx.workflow.WorkElement(namespace="myplugin",
-                                                 operation="create_restraint",
-                                                 params=params)
-    potential_element.name = "harmonic_restraint"
+
+    potential_element = myplugin.harmonic_restraint(params=params)
     md.add_dependency(potential_element)
     gmx.run(md)
+
+.. Updated from version 0.0.6:
+       potential_element = gmx.workflow.WorkElement(namespace="myplugin",
+       operation="create_restraint",
+       params=params)
+       potential_element.name = "harmonic_restraint"
+
 
 Refer to the `sample <https://github.com/kassonlab/sample_restraint>`_ plugin
 for an additional example of an ensemble-restraint biasing potential that
@@ -124,10 +129,26 @@ Preparing simulation input
 Instead of ``gmx.workflow.from_tpr()``, simulation input can be prepared more
 directly.
 
+With work graph operations
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autofunction:: gmx.make_input
+
+.. autofunction:: gmx.edit_params
+
+Additionally, reference issue
+`effective generation of TPR files from MDP data #52 <https://github.com/kassonlab/gmxapi/issues/52>`_
+
+With file utilities
+^^^^^^^^^^^^^^^^^^^
+
+See also `Tool to update TPR #86 <https://github.com/kassonlab/gmxapi/issues/86>`_
 
 Manipulating simulation parameters
 ----------------------------------
+
+Additionally, reference issue
+`Modify TPR parameter #85 <https://github.com/kassonlab/gmxapi/issues/85>`_
 
 With key word arguments
 ^^^^^^^^^^^^^^^^^^^^^^^
