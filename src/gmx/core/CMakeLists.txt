@@ -35,6 +35,7 @@ set_target_properties(pygmx_core PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 #set_target_properties(pygmx_core PROPERTIES INSTALL_RPATH ${PYGMX_RPATH})
 
 target_link_libraries(pygmx_core PRIVATE Gromacs::gmxapi)
+#target_link_libraries(pygmx_core PRIVATE Gromacs::gmxapi gmxapicompat)
 
 include(GNUInstallDirs)
 
