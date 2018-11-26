@@ -9,7 +9,7 @@
 
 #include <type_traits>
 
-namespace gmxapi_compat {
+namespace gmxapicompat {
 
 /*!
  * \brief Label the types recognized by gmxapi.
@@ -116,6 +116,6 @@ template<> GmxapiType mapCppType<double, 8>()
 };
 
 
-} // end namespace gmxapi_compat
+} // end namespace gmxapicompat
 
 #endif //GMXPY_GMXAPITYPES_H

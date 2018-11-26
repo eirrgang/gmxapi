@@ -8,7 +8,7 @@
 #include <exception>
 #include <string>
 
-namespace gmxapi_compat {
+namespace gmxapicompat {
 
 /*!
  * \brief Generic exception class for gmxapicompat.
@@ -50,5 +50,5 @@ class TypeError : public Exception {
     using Exception::Exception;
 };
 
-} // end namespace gmxapi_compat
+} // end namespace gmxapicompat
 #endif //GMXAPICOMPAT_EXCEPTIONS_H

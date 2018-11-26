@@ -1,6 +1,8 @@
 # Build the C++ extension
 include_directories(${PYTHON_INCLUDE_DIRS})
 
+add_subdirectory(compatibility)
+
 pybind11_add_module(pygmx_core
                     core.cpp
                     export_context.cpp
@@ -20,6 +22,7 @@ set_target_properties(pygmx_core PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BIN
 target_include_directories(pygmx_core PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/compatibility/include
     )
 
 # RPATH management
@@ -34,8 +37,8 @@ set_target_properties(pygmx_core PROPERTIES SKIP_BUILD_RPATH FALSE)
 set_target_properties(pygmx_core PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 #set_target_properties(pygmx_core PROPERTIES INSTALL_RPATH ${PYGMX_RPATH})
 
-target_link_libraries(pygmx_core PRIVATE Gromacs::gmxapi)
-#target_link_libraries(pygmx_core PRIVATE Gromacs::gmxapi gmxapicompat)
+# gmxapi_compat target establishes the correct includes for the compatibility level.
+target_link_libraries(pygmx_core PRIVATE Gromacs::gmxapi gmxapicompat)
 
 include(GNUInstallDirs)
 

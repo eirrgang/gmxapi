@@ -23,13 +23,6 @@ if(gmxapi_FOUND)
     message(STATUS "Found gmxapi version ${gmxapi_VERSION}${_suffix}")
 endif()
 
-# It might be possible to provide compatibility through just headers and CMake
-# config, but there would be some potentially ugly transitive linking stuff to
-# contrive, and it is probably just better to make it a full library.
-# For now, let's skip the generality and just develop the basic headers in the
-# pygmx_core target.
-#add_subdirectory(compatibility)
-
 add_subdirectory(gmx)
 
 ##################

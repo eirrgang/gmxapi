@@ -1,37 +1,12 @@
-#ifndef GMXAPICOMPAT_GROMACS2019_H
-#define GMXAPICOMPAT_GROMACS2019_H
-
-/*! \file
- * \brief GROMACS 2019 compatibility header.
- *
- * Provide compatibility for gmxapi extensions not available in GROMACS 2019
- * installations.
- *
- * Note that in GROMACS 2019, the `gromacs` installed header location is available
- * transitively through the imported gmxapi target because it has the same parent
- * directory as the installed gmxapi headers.
- *
- * \note This header is should not be included directly. See gmxapicompat.h
- *
- * \author M. Eric Irrgang <ericirrgang@gmail.com>
- * \ingroup gmxapi_compat
- */
+#include "gmxapicompat/gmxapicompat.h"
 
 // Check whether we are compiling against GROMACS 2019 and gmxapi 0.0.7
 #ifdef GROMACS2019
+// Todo: what if we're not?
 
-#include <map>
-#include <string>
-#include <vector>
-#include <ldap.h>
-
-#include "gromacs/mdtypes/inputrec.h"
-
-#include "exceptions.h"
-#include "gmxapitypes.h"
-
-namespace gmxapi_compat
+namespace gmxapicompat
 {
+
 
 /*!
  * \brief Static map of GROMACS 2019 mdp file entries to normalized "type".
@@ -199,7 +174,7 @@ public:
      *
      * To load values from a TPR file, see getMdParams().
      */
-    GmxMdParams();
+//    GmxMdParams();
 
     /*!
      * \brief Get the current list of keys.
@@ -293,22 +268,21 @@ double GmxMdParams::extract<double>(const std::string& key) const {
         return inputRecord_.*dataMemberPointer;
     }
 }
+//
+///*!
+// * \brief
+// *
+// */
+//GmxMdParams::GmxMdParams()
+//{
+//    // Set up the static mapping of (typed) parameter names.
+//    intParams_ = int32Params();
+//    int64Params_ = int64Params();
+//    floatParams_ = float32Params();
+//    float64Params_ = float64Params();
+//}
 
-/*!
- * \brief
- *
- */
-GmxMdParams::GmxMdParams()
-{
-    // Set up the static mapping of (typed) parameter names.
-    intParams_ = int32Params();
-    int64Params_ = int64Params();
-    floatParams_ = float32Params();
-    float64Params_ = float64Params();
-}
 
-} // end namespace gmxapi_compat
+} // end namespace gmxapicompat
 
-#endif //GROMACS2019
-
-#endif //GMXAPICOMPAT_GROMACS2019_H
+#endif // GROMACS2019
