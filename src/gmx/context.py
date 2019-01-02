@@ -7,7 +7,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-__all__ = ['Context']
+__all__ = ['Context01']
 
 import importlib
 import os
@@ -564,7 +564,7 @@ class DefaultContext(_libgromacsContext):
         warnings.warn("Behavior of DefaultContext is unspecified starting in gmxapi 0.0.8.", DeprecationWarning)
         super(DefaultContext, self).__init__(work)
 
-class Context(object):
+class Context01(object):
     """Manage an array of simulation work executing in parallel.
 
     This is the first implementation of a new style of Context class that has some extra abstraction
@@ -1090,7 +1090,7 @@ class Context(object):
 # The interface and functionality of ParallelArrayContext is the new generic
 # Context behavior, but we need to keep the old name for compatibility for
 # the moment.
-ParallelArrayContext = Context
+ParallelArrayContext = Context01
 
 def get_context(work=None):
     """Get a concrete Context object.
@@ -1134,6 +1134,6 @@ def get_context(work=None):
             workspec._context is not None:
         context = workspec._context
     else:
-        context = Context(work=workspec)
+        context = Context01(work=workspec)
 
     return context
