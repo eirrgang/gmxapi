@@ -1092,6 +1092,14 @@ class Context01(object):
 # the moment.
 ParallelArrayContext = Context01
 
+class graphContext(object):
+    """Manages a work graph and data proxies for deferred execution.
+
+    Used as the default context in the scripting environment.
+    """
+    def __init__(self):
+        pass
+
 def get_context(work=None):
     """Get a concrete Context object.
 
@@ -1106,12 +1114,12 @@ def get_context(work=None):
 
     If work is provided, return a Context object capable of running the provided work or produce an error.
 
-    The semantics for finding Context implementations needs more consideration, and a more informative exception
-    is likely possible.
+    TODO: The semantics for finding Context implementations needs more consideration,
+     and a more informative exception is likely possible.
 
     A Context can run the provided work if
 
-      * the Context supports can resolve all operations specified in the elements
+      * the Context can resolve all operations specified in the elements
       * the Context supports DAG topologies implied by the network of dependencies
       * the Context supports features required by the elements with the specified parameters,
         such as synchronous array jobs.
@@ -1129,11 +1137,14 @@ def get_context(work=None):
             workspec = work.workspec
         else:
             raise exceptions.ValueError('work argument must provide a gmx.workflow.WorkSpec.')
-    if workspec is not None and \
-            hasattr(workspec, '_context') and \
+    if workspec is not None:
+        if hasattr(workspec, '_context') and \
             workspec._context is not None:
-        context = workspec._context
+            context = workspec._context
+        else:
+            context = Context01(work=workspec)
     else:
-        context = Context01(work=workspec)
+        # context = _default
+        context = None
 
     return context

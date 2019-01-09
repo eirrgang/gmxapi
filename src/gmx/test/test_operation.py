@@ -3,6 +3,7 @@
 import unittest
 
 import gmx
+import json
 
 # Import the sample operation module from the directory containing these tests.
 import operationtest
@@ -53,13 +54,34 @@ class GraphSetupTestCase(unittest.TestCase):
     def test_implicit_graph(self):
         """Test that the expected operations and outputs are defined in the default graph.
 
-        Use the scripting interface and the default graphContext to configure a
+        Use the scripting interface configure and execute a
         work graph with two operations.
         """
-        self.operation1 = operationtest.dummy_operation1(param1='', param2='')
-        self.operation2 = operationtest.dummy_operation2(
+        label1 = 'some label text'
+        label2 = 'other label text'
+        operation1 = operationtest.dummy_operation1(param1='', param2='', label=label1)
+        operation2 = operationtest.dummy_operation2(
             input={'input1': '',
-                   'input2': self.operation1.output.data1})
+                   'input2': operation1.output.data1},
+            label=label2)
+        # context = gmx.get_context()
+        # graph = json.loads(context.work.serialize())
+        # assert 'elements' in graph
+        # elements = graph['elements']
+        # assert operation1.label == label1
+        # assert operation2.label == label2
+        #
+        # found = False
+        # for node in elements:
+        #     if node['name'] == label1:
+        #         found = True
+        # assert found
+        #
+        # found = False
+        # for node in elements:
+        #     if node['name'] == label2:
+        #         found = True
+        # assert found
 
     def test_explicit_graph(self):
         """Test that the helper functions also correctly handle explicit context."""

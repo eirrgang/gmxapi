@@ -60,10 +60,10 @@ class DummyOperation2(object):
 
 # Implement the main factories for these operations..
 
-def dummy_operation1(param1='', param2=''):
+def dummy_operation1(param1='', param2='', label=None):
     operation = DummyOperation1()
     return operation
 
-def dummy_operation2(input=None):
+def dummy_operation2(input=None, label=None):
     operation = DummyOperation2()
     return operation
