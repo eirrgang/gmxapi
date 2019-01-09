@@ -19,6 +19,9 @@ from pkg_resources import get_distribution, DistributionNotFound
 # sys.path.insert(0, os.path.abspath('.'))
 #sys.path.insert(0, '@CMAKE_INSTALL_PREFIX@/@PYMOD_INSTALL_DIR@')
 
+plantuml = 'java -jar /Users/eric/bin/plantuml.jar'
+plantuml_output_format = 'svg'
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -29,6 +32,7 @@ needs_sphinx = '1.4'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinxcontrib.plantuml',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',

@@ -23,3 +23,6 @@ find the ``Gromacs::gmxapi`` CMake target provided by the GROMACS installation.
 
 The ``gmxapi`` library is provided in GROMACS 2019 and in a separate GROMACS fork at
 https://github.org/kassonlab/gromacs-gmxapi/
+
+..  uml:: diagrams/outputAccessSequence.pu
+    :caption: Caption
