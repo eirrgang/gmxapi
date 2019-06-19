@@ -33,6 +33,36 @@
 # the research papers on the package. Check out http://www.gromacs.org.
 
 """gmxapi data types and interfaces.
+
+The data types defined here are Abstract Base Classes (ABCs) in the styles of
+the collections.abc and typing modules. They can be used to validate interfaces
+or data compatibility with isinstance() and issubclass() checks, even for types
+that don't explicitly inherit from the ABCs.
+
+The ABCs can be used as base classes for concrete types, but
+code should not assume that gmxapi data objects actually derive from these
+base classes. In fact, gmxapi data objects will generally be C (or C++) objects
+accompanied by C struct descriptors. ABI compatibility relies on these C structs
+and the accompanying Python Capsule schema.
+
+Note: In the senses above, Python "abstract base class" has a different meaning than in C++.
+
+TODO: Placeholders
+Input Placeholders.
+An operation factory can advertise allowed inputs by name, shape, and type, as
+well as advertising flexibility. Named inputs may be optional. Number of dimensions
+is fixed, but the size in a given dimension may be fixed or flexible. A named
+input may have flexible type. Once a data edge and terminal operation are
+instantiated, though, the output of the Operation is well defined.
+
+Need a way to represent Type placeholders for Operation inputs in InputCollectionDescription
+and factory declarations.
+
+Need a way to express input data shape with magic integer placeholders.
+
+File placeholder: Input and output files have constraints on their filename suffixes,
+but should otherwise be left abstract until data connections are made. This is a
+special case of a string Future when we are dealing with files by name only.
 """
 
 __all__ = ['ndarray', 'NDArray']
@@ -86,6 +116,8 @@ def ndarray(data=None, shape=None, dtype=None):
 
     Arguments:
         data: object supporting sequence, buffer, or Array Interface protocol
+        shape: integer tuple specifying the size of each of one or more dimensions
+        dtype: data type understood by gmxapi
 
     ..  versionadded:: 0.1
         *shape* and *dtype* parameters
@@ -94,7 +126,7 @@ def ndarray(data=None, shape=None, dtype=None):
     provided, both `shape` and `dtype` are required.
 
     If `data` is provided and shape is provided, `data` must be compatible with
-    or convertible to `shape`. See Broadcast Rules in `datamodel` documentation.
+    or convertible to `shape`. See Broadcast Rules in :doc:`datamodel` documentation.
 
     If `data` is provided and `dtype` is not provided, data type is inferred
     as the narrowest scalar type necessary to hold any element in `data`.
@@ -102,11 +134,33 @@ def ndarray(data=None, shape=None, dtype=None):
     of `data`.
 
     The returned object implements the gmxapi N-dimensional Array Interface.
+
+    ToDo: Does ndarray accept Futures in data and produce a Future? Or does it
+     reject Futures in input? In other words, is ndarray guaranteed to produce a
+     locally available object, and, if so, does it do so by rejecting non-local
+     data, by implicitly resolving data locally, or with behavior controlled by
+     additional keywords? Suggestion (MEI): uniform local-only behavior; separate
+     function(s) for other use cases, a la numpy.asarray()
     """
+    # assert isinstance(shape, tuple)
+    if hasattr(data, 'result'):
+        # TODO: reinstate this check when we have a way to convert Futures of Scalar (or unknown) type
+        #  into Futures of NDArray type.
+        # raise exceptions.ValueError('Cannot construct an NDArray from a Future object.')
+        pass
     if data is None:
+        if shape is None or dtype is None:
+            raise exceptions.ValueError('If data is not provided, both shape and dtype are required.')
         array = NDArray()
+        array.dtype = dtype
+        array.shape = shape
+        array.values = [dtype()] * shape[0]
     else:
         if isinstance(data, NDArray):
+            if shape is not None:
+                assert shape == data.shape
+            if dtype is not None:
+                assert dtype == data.dtype
             return data
         # data is not None, but may still be an empty sequence.
         length = 0
@@ -116,5 +170,26 @@ def ndarray(data=None, shape=None, dtype=None):
             # data is a scalar
             length = 1
             data = [data]
+        if len(shape) > 0:
+            if length > 1:
+                assert length == shape[0]
+        else:
+            if length == 0:
+                shape = ()
+            else:
+                shape = (length,)
+        if len(shape) > 0:
+            if dtype is not None:
+                assert isinstance(dtype, type)
+                assert isinstance(data[0], dtype)
+            else:
+                dtype = type(data[0])
+        for value in data:
+            if dtype == NDArray:
+                assert False
+            assert dtype(value) == value
         array = NDArray(data)
+        array.dtype = dtype
+        array.shape = shape
+        array.values = list([dtype(value) for value in data])
     return array
