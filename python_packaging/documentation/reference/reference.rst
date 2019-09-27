@@ -10,3 +10,4 @@ Developer Guide
     contributing
     datamodel
     executionmodel
+    workspec_schema_0_2.rst
