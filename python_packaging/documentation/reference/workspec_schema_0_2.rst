@@ -332,59 +332,109 @@ gmxapi_graph_0_2
     Output ports are determined by querying the operation, so the available keys
     and types are included in the record.
 
-Graph node structure example::
+Simple simulation using data sources produced by previously defined work::
 
-    'elements': {
-        'filemap_aaaaaa': {
-            operation: 'make_map',
-            'input': {
-                '-f': ['some_filename'],
-                '-t': ['filename1', 'filename2']
-            },
-            'output': {
-                'file': 'gmxapi.Map'
-            }
-        },
-        'cli_op_aaaaaa': {
-            'label': 'exe1',
-            'namespace': 'gmxapi',
-            'operation': 'commandline',
-            'input': {
-                'executable': ['some_executable'], # list length gives ensemble width
-                'arguments': [[]], # Nested list allows disambiguation of array data within a single ensemble member.
-                'input_file_arguments': 'filemap_aaaaaa',
-                # Complex values can use indirection to helper operations
-                # to reduce parsing complexity.
-                # Alternatively,
-                # we could make parsing recursive and allow arbitrary nesting
-                # with special semantics for dictionaries (as well as lists)
-            },
-            'output': {
-                'file': 'gmxapi.Map'
-            }
-        },
-        'filemap_bbbbbb: {
-            'label': 'exe1_output_files',
-            'namespace': 'gmxapi',
-            'operation': 'make_map',
-            'input': {
-                '-in1': 'cli_op_aaaaaa.output.file.-o',
-                '-in2': ['static_fileB'],
-                '-in3': ['arrayfile1', 'arrayfile2'] # matches dimensionality of inputs
-            }
-        },
-        'cli_op_bbbbbb': {
-            'label': 'exe2',
-            'namespace': 'gmxapi',
-            'operation': 'commandline',
-            'input': {
-                'executable': [],
-                'arguments': [],
-                'input_file_arguments': 'filemap_bbbbbb'
-            },
-        },
+    {}
 
-    }
+Simple simulation reading inputs from the filesystem::
+
+   {
+       "version": "gmxapi_workspec_0_1",
+       "elements":
+       {
+           "tpr_input":
+           {
+               "namespace": "gmxapi",
+               "operation": "load_tpr",
+               "params": […],
+               "depends": []
+           }
+           "md_sim":
+           {
+               "namespace": "gmxapi",
+               "operation": "md",
+               "params": [],
+               "depends": ["tpr_input", "ensemble_restraint"]
+           }
+           "ensemble_restraint_1":
+           {
+               "namespace": "myplugin",
+               "operation": "ensemble_restraint",
+               "params": [...],
+               "depends": []
+           }
+       }
+   }
+
+.. .. rubric:: Example
+
+    Illustrate the implementation of the command line wrapper.
+
+    The *gmxapi* Python package contains a helper :py:func:`gmxapi.commandline_operation`
+    that was implemented in terms of more strictly defined operations.
+    The :py:func:`gmxapi.commandline.cli` operation is aware only of an arbitrarily
+    long array of command line arguments. The wrapper script constructs the
+    necessary graph elements and data flow to give the user experience of files
+    being consumed and produced, though these files are handled in the framework
+    only as strings and string futures.
+
+    Graph node structure example::
+
+        {
+            "version": "gmxapi_graph_0_2",
+            "elements":
+            {
+                "filemap_aaaaaa": {
+                    operation: "make_map",
+                    "input": {
+                        "-f": ["some_filename"],
+                        "-t": ["filename1", "filename2"]
+                    },
+                    "output": {
+                        "file": "gmxapi.Map"
+                    }
+                },
+                "cli_op_aaaaaa": {
+                    "label": "exe1",
+                    "namespace": "gmxapi",
+                    "operation": "cli",
+                    "input": {
+                        "executable": ["some_executable"], # list length gives ensemble width
+                        "arguments": [[]], # Nested list allows disambiguation of array data within a single ensemble member.
+                        "input_file_arguments": "filemap_aaaaaa",
+                        # Complex values can use indirection to helper operations
+                        # to reduce parsing complexity.
+                        # Alternatively,
+                        # we could make parsing recursive and allow arbitrary nesting
+                        # with special semantics for dictionaries (as well as lists)
+                    },
+                    "output": {
+                        "file": "gmxapi.Map"
+                    }
+                },
+                "filemap_bbbbbb: {
+                    "label": "exe1_output_files",
+                    "namespace": "gmxapi",
+                    "operation": "make_map",
+                    "input": {
+                        "-in1": "cli_op_aaaaaa.output.file.-o",
+                        "-in2": ["static_fileB"],
+                        "-in3": ["arrayfile1", "arrayfile2"] # matches dimensionality of inputs
+                    }
+                },
+                "cli_op_bbbbbb": {
+                    "label": "exe2",
+                    "namespace": "gmxapi",
+                    "operation": "commandline",
+                    "input": {
+                        "executable": [],
+                        "arguments": [],
+                        "input_file_arguments": "filemap_bbbbbb"
+                    },
+                },
+
+            }
+        }
 
 Deserialization heuristics
 --------------------------
