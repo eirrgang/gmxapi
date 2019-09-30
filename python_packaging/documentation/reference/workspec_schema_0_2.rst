@@ -287,7 +287,8 @@ Work graph grammar and schema
 Names (labels and UIDs) in the work graph are strings from the ASCII / Latin-1 character set.
 Periods (``.``) have special meaning as delimiters.
 
-Bare string values are interpreted as references to other work graph entities.
+Bare string values are interpreted as references to other work graph entities
+or API facilities known to the Context implementation.
 Strings in lists are interpreted as strings.
 
 .. todo:: Consider disallowing bare scalar constants.
@@ -484,9 +485,9 @@ Simple simulation reading inputs from the filesystem::
                },
                "output":
                {
-                  "parameters": gmxapi.Mapping,
-                  "simulation_state": gmxapi.Mapping,
-                  "microstate": gmxapi.NDArray
+                  "parameters": "gmxapi.Mapping",
+                  "simulation_state": "gmxapi.Mapping",
+                  "microstate": "gmxapi.NDArray"
                }
            }
            "mdrun_<hash>":
@@ -580,6 +581,115 @@ Simple simulation reading inputs from the filesystem::
 
             }
         }
+
+.. rubric:: Example
+
+Subgraph specification and use. Illustrate the toy example of the subgraph test.
+
+The *gmxapi.test* module contains the following code::
+
+    import gmxapi as gmx
+
+    @gmx.function_wrapper(output={'data': float})
+    def add_float(a: float, b: float) -> float:
+        return a + b
+
+    @gmx.function_wrapper(output={'data': bool})
+    def less_than(lhs: float, rhs: float) -> bool:
+        return lhs < rhs
+
+    def test_subgraph_function():
+        subgraph = gmx.subgraph(variables={'float_with_default': 1.0, 'bool_data': True})
+        with subgraph:
+            # Define the update for float_with_default to come from an add_float operation.
+            subgraph.float_with_default = add_float(subgraph.float_with_default, 1.).output.data
+            subgraph.bool_data = less_than(lhs=subgraph.float_with_default, rhs=6.).output.data
+        operation_instance = subgraph()
+        operation_instance.run()
+        assert operation_instance.values['float_with_default'] == 2.
+
+        loop = gmx.while_loop(operation=subgraph, condition=subgraph.bool_data)
+        handle = loop()
+        assert handle.output.float_with_default.result() == 6
+
+This could be serialized with something like the following, by separating the
+concrete primary work graph from the abstract graph defining the data flow in
+the subgraph. Note that a subgraph description is a special case of the
+description of a fused operation, which we may need to explore when considering
+how Context implementations may support dispatching between environments that
+warrant different sorts of optimizations. We should also consider the Google
+"protocol buffer" and gRPC syntax and semantics.
+
+::
+
+    {
+        "concrete_graph_<hash>":
+        {
+            "version": "gmxapi_graph_0_2",
+            "elements":
+            {
+                "while_loop_<hash>":
+                {
+                    "namespace": "gmxapi",
+                    "operation": "while_loop",
+                    "input":
+                    {
+                        "operation": ".abstact_graph_<hash>"
+                    },
+                    "depends": [".abstract_graph_<hash>.interface.bool_data"],
+                    "output":
+                    {
+                        "float_with_default": "gmxapi.Float64",
+                        "bool_data": "gmxapi.Bool"
+                    }
+                }
+            }
+        "abstract_graph_<hash>":
+            {
+                "input":
+                {
+                    "float_with_default": 1.0,
+                    "bool_data": True
+                },
+                "output":
+                {
+                    "float_with_default": "add_float_<hash>.output.data",
+                    "bool_data": "less_than_<hash>.output.data"
+                },
+                "elements":
+                {
+                    "less_than_<hash>":
+                    {
+                        "namespace": "gmxapi.test",
+                        "operation": "less_than",
+                        "input":
+                        {
+                            "lhs": "add_float_<hash>.output.data",
+                            "rhs": [[6.]]
+                        }
+                        "output":
+                        {
+                            "data": "gmxapi.Bool"
+                        }
+                    }
+                    "add_float_<hash>":
+                    {
+                        "namespace": "gmxapi.test",
+                        "operation": "add_float",
+                        "input":
+                        {
+                            "a": ".abstract_graph_<hash>.float_with_default",
+                            "b": [[1.]]
+                        }
+                        "output":
+                        {
+                            "data": "gmxapi.Float64"
+                        }
+                    }
+                }
+            }
+        }
+    ]
 
 Deserialization heuristics
 --------------------------
