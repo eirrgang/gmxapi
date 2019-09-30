@@ -128,22 +128,22 @@ Version 1 Ensemble input determination
 
 Scalar input
 
-function fill_from_scalar_source(input, source):
-    try:
-        input.set(input.dtype(source))
-    else try:
-        input.set(gmxapi_future(source, dtype=input.dtype))
-    else try:
-        if iterable(source) and not isinstance(source, (str, bytes)):
-            for i, element in enumerate(source):
-                input.ensemble_rank(i).set(fill_from_scalar_source(input.ensemble_rank(i), element))
+    function fill_from_scalar_source(input, source):
+        try:
+            input.set(input.dtype(source))
+        else try:
+            input.set(gmxapi_future(source, dtype=input.dtype))
+        else try:
+            if iterable(source) and not isinstance(source, (str, bytes)):
+                for i, element in enumerate(source):
+                    input.ensemble_rank(i).set(fill_from_scalar_source(input.ensemble_rank(i), element))
 
 Array input treated as a type of scalar
 
 Version 2 Ensemble input determination
 --------------------------------------
 
-Scalar input: get handle to dimension 0
+Scalar input: get handle to dimension 0::
 
     function fill_from_scalar_source(input, source):
         try:
@@ -158,7 +158,7 @@ Scalar input: get handle to dimension 0
 (specify recursion depth.)
 Generators must be explicitly resolved or converted to futures for v1.
 
-array input
+array input::
 
     function get_array_input(source, N):
         if isinstance(source, (str, bytes):
@@ -196,9 +196,11 @@ Input argument is assumed to be an ensemble of values if it
 1. does not implement the _gmxapi_future interface
 2. is iterable
 3. not isinstace(arg, (str, bytes)
-4a. is not a generator and has dimensionality that is greater than the consuming input
-4b. is a generator or has dimensionality greater than the consuming input
-4c.
+4. meets the following criteria
+
+  1. is not a generator and has dimensionality that is greater than the consuming input
+  2. is a generator or has dimensionality greater than the consuming input
+  3. ...
 
 Note: This implies that numpy.ndarray requires explicit wrapping to avoid being
 considered as ensemble input.
@@ -207,18 +209,32 @@ Consider
 --------
 
 1. All data has a shape.
-2. Inputs can constrain their shape (zero-dimensions for scalar) with a type hint, default value, or decorator. Individual dimensions can be constrained to a fixed size or left unconstrained.
-3. Automatically, data sources and sinks try to make a best match that minimizes the edge dimensionality. Ensemble dimension may be increased to allow implicit scatter or map. Implicit broadcast may occur to satisfy topology but will _not_ occur to fill an explicitly sized dimension of a sink. This means that, in two steps, data source and sink shape are inspected to determine the necessary topology, then implicit scatter or broadcast occurs. Implicit gather never occurs.
-4. The automatic edge shape can be overridden. `scatter()` converts the outermost (non-ensemble?) dimension to an ensemble dimension or broadcasts where necessary. `gather()` converts the outermost ensemble dimension to a local data dimension, broadcasting (instead of implicitly scattering) to satisfy edge topology if necessary.
+2. Inputs can constrain their shape (zero-dimensions for scalar) with a type hint, default value, or decorator.
+   Individual dimensions can be constrained to a fixed size or left unconstrained.
+3. Automatically, data sources and sinks try to make a best match that minimizes the edge dimensionality.
+   Ensemble dimension may be increased to allow implicit scatter or map. Implicit broadcast may occur to satisfy
+   topology but will _not_ occur to fill an explicitly sized dimension of a sink. This means that, in two steps, data
+   source and sink shape are inspected to determine the necessary topology, then implicit scatter or broadcast occurs.
+   Implicit gather never occurs.
+4. The automatic edge shape can be overridden. `scatter()` converts the outermost
+   (non-ensemble?) dimension to an ensemble dimension or broadcasts where necessary.
+   `gather()` converts the outermost
+   ensemble dimension to a local data dimension, broadcasting (instead of implicitly scattering) to satisfy edge
+   topology if necessary.
 
-Note: this implies there is a distinction between a data source, a collection of data sources, and an edge fed by a data source collection.
+Note: this implies there is a distinction between a data source,
+a collection of data sources, and an edge fed by a data source collection.
 
 Clarify: How do the various shapes of data in a collection affect their shapes in the resulting edge?
-Clarify / confirm: scatter and gather should probably always have an effect even if it breaks data shape compatibility while an implicit operation would not.
+Clarify / confirm: scatter and gather should probably always have an effect
+even if it breaks data shape compatibility while an implicit operation would not.
 
-Annotations: Data is represented by numpy-like gmxapi data handles with dimensionality. NDArray becomes an abstract base class for annotation, type hinting, and type checking.
+Annotations: Data is represented by numpy-like gmxapi data handles with dimensionality.
+NDArray becomes an abstract base class for annotation, type hinting, and type checking.
 
-Observation: The introspection of sink shape means this proposal calls for avoidance of ensemble creation in cases where we previously might have aggressively created ensembles.
+Observation: The introspection of sink shape means this proposal calls for
+avoidance of ensemble creation in cases where we previously might have
+aggressively created ensembles.
 
 Consider
 --------
@@ -230,10 +246,14 @@ Proposed reserved words for input and output names: ``input``, ``output``, ``con
 
 Furthermore, we can consider allowing unnamed outputs when output is singular or a collection type.
 
-Keeping with the principle "there should be one, and preferably only one, obvious way to do something," we should prefer either
-collection behavior (sized, iterable...) or aggregate type / namespace-like behavior with named attributes.
-The latter is more like the statically-typed data ports we expect in C++ and is friendly to tab-completion and object inspection,
-but means that it is a little inconsistent to implement __getitem__. However, it would seem fine to have member functions
+Keeping with the principle
+"there should be one, and preferably only one, obvious way to do something,"
+we should prefer either collection behavior (sized, iterable...)
+or aggregate type / namespace-like behavior with named attributes.
+The latter is more like the statically-typed data ports we expect in C++ and is
+friendly to tab-completion and object inspection,
+but means that it is a little inconsistent to implement __getitem__.
+However, it would seem fine to have member functions
 that produce helpful views, such as ``outputs()``, ``inputs()``.
 
 Operation implementation
@@ -249,6 +269,7 @@ future of a compatible type, or if the input is an ensemble of compatible input.
 In the Python implementation, the framework checks the expressed input type and
 resolves the abstract base class / metaclass. To type-check input arguments, the
 framework can perform the following checks.
+
 1. If the input object has a `_gmxapi_future` attribute, the Data Future Protocol
    is used to confirm compatibility and bind. All gmxapi types can implement the
    Data Future Protocol.
@@ -265,36 +286,38 @@ Data Future protocol
 --------------------
 
 
-# Result scenarios:
-#
-# In (rough) order of increasing complexity:
-#
-# * stateless and reproducible locally: calculate when needed
-# * stateful and reproducible locally: calculate as needed, but implementation
-#   needs to avoid resource contention, race conditions, reentrancy issues.
-# * deferred: need to allow resource manager to provide data as it becomes available.
-#
-# In the general case, then, the Result handle should
-#
-# 1. allow a consumer to register its interest in the result with its own resource
-#    manager and allow itself to be provided with the result when it is available.
-# 2. Allow the holder of the Result handle to request the data immediately,
-#    with the understanding that the surrounding code is blocked on the request.
-#
-# Note that in case (1), the holder of the handle may not use the facility,
-# especially if it will be using (2).
+Result scenarios:
+
+In (rough) order of increasing complexity:
+
+ * stateless and reproducible locally: calculate when needed
+ * stateful and reproducible locally: calculate as needed, but implementation
+   needs to avoid resource contention, race conditions, reentrancy issues.
+ * deferred: need to allow resource manager to provide data as it becomes available.
+
+In the general case, then, the Result handle should
+
+1. allow a consumer to register its interest in the result with its own resource
+   manager and allow itself to be provided with the result when it is available.
+2. Allow the holder of the Result handle to request the data immediately,
+   with the understanding that the surrounding code is blocked on the request.
+
+Note that in case (1), the holder of the handle may not use the facility,
+especially if it will be using (2).
 
 
-# Questions:
-#  * Are the members of `output` statically specified?
-#  * Are the keys of a Map statically specified?
-#  * Is `output` a Map?
-# Answers:
-# Compiled code should be able to discover an output format. A Map may have different keys depending
-# on the work and user input, even when consumed or produced by compiled code. (A Map with statically
-# specified keys would be a schema, which will not be implemented for a while.) Therefore, `output`
-# is not a Map or a Result of Map type, but a ResultCollection or ResultCollectionDescriptor
-# (which may be the output version of the future schema implementation).
+Questions:
+
+ * Are the members of `output` statically specified?
+ * Are the keys of a Map statically specified?
+ * Is `output` a Map?
+
+Answers:
+Compiled code should be able to discover an output format. A Map may have different keys depending
+on the work and user input, even when consumed or produced by compiled code. (A Map with statically
+specified keys would be a schema, which will not be implemented for a while.) Therefore, `output`
+is not a Map or a Result of Map type, but a ResultCollection or ResultCollectionDescriptor
+(which may be the output version of the future schema implementation).
 
 
 Notes on data compatibility
