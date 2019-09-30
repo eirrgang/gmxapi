@@ -2,7 +2,7 @@
 Work specification schema
 =========================
 
-Draft version 2 (27 September 2019)
+Draft version 3 (30 September 2019)
 
 ..  contents::
     :local:
@@ -316,28 +316,9 @@ gmxapi_workspec_0_1
     builders are called in topologically valid order, as determined by the DAG
     implied by the *depends* network.
 
-Graph node structure example::
+.. seealso::
 
-    'elements': {
-        'cli_op_aaaaaa': {
-            'namespace': 'gmxapi',
-            'operation': 'commandline_operation',
-            'params': {
-                'executable': [],
-                'arguments': [[]],
-            },
-            'depends': []
-        },
-        'cli_op_bbbbbb': {
-            'namespace': 'gmxapi',
-            'operation': 'commandline_operation',
-            'params': {
-                'executable': [],
-                'arguments': [[], []],
-            },
-            'depends': ['cli_op_aaaaaa']
-        },
-    }
+   `DOI 10.1093/bioinformatics/bty484 <https://doi.org/10.1093/bioinformatics/bty484>`_
 
 gmxapi_graph_0_2
 """"""""""""""""
