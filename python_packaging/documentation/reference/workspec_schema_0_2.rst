@@ -2,33 +2,16 @@
 Work specification schema
 =========================
 
-Draft version 3 (30 September 2019)
-
-..  contents::
+..  contents:: Draft version 3 (30 September 2019)
     :local:
-
-Goals
-=====
-
-- Serializeable representation of a molecular simulation and analysis workflow
-  that is
-
-  - complete enough for abstractly specified work to be unambiguously translated to API calls, and
-  - simple enough to be robust to API updates and uncoupled from implementation details.
-- Facilitate easy integration between independent but compatible implementation code in Python or C++.
-- Support verifiable compatibility with a given API level.
-- Provide enough information to uniquely identify the "state" of deterministic inputs and outputs.
-
-For the last point, the meaning of "deterministic" is explored in the following
-discussions on uniqueness, deduplication, independent trials, and checkpointing.
+    :depth: 2
 
 Documentation by example
 ========================
 
-
 .. rubric:: Example
 
-Simple simulation using data sources produced by previously defined work::
+Simple simulation using :ref:`data sources <simulation input>` produced by previously defined work::
 
    {
        "version": "gmxapi_graph_0_2",
@@ -48,16 +31,13 @@ Simple simulation using data sources produced by previously defined work::
            }
    }
 
-
-Note that *simulation_state* is a mutable internal aspect of *mdrun* that must
-be checkpointed, but that is a detail of the operation implementation in a
-particular Context. Its exposure in the work graph indicates the immutable data
-with which the operation is initialized when the initial work graph state is
-established.
-
 .. rubric:: Example
 
-Simple simulation reading inputs from the filesystem::
+This example exercises more of the :ref:`grammar` in a complete, self-contained
+graph.
+
+Simulation reading inputs from the filesystem, with an attached restraint from a
+pluggable extension module::
 
    {
        "version": "gmxapi_graph_0_2",
@@ -279,6 +259,21 @@ warrant different sorts of optimizations. We should also consider the Google
             }
         }
     ]
+
+Goals
+=====
+
+- Serializeable representation of a molecular simulation and analysis workflow
+  that is
+
+  - complete enough for abstractly specified work to be unambiguously translated to API calls, and
+  - simple enough to be robust to API updates and uncoupled from implementation details.
+- Facilitate easy integration between independent but compatible implementation code in Python or C++.
+- Support verifiable compatibility with a given API level.
+- Provide enough information to uniquely identify the "state" of deterministic inputs and outputs.
+
+For the last point, the meaning of "deterministic" is explored in the following
+discussions on uniqueness, deduplication, independent trials, and checkpointing.
 
 Terms (more clarification needed)
 =================================
@@ -644,6 +639,23 @@ representing variable data or values explained in this text.
 representation of the unique features of the operation node. This value is
 calculated by the Context with help from the Operation definition.
 
+.. _simulation input:
+
+Simulation input
+""""""""""""""""
+
+The API conventions allow for specification of certain hierarchical data for
+collaborating operations. For instance, we currently expect that a simulation
+operation like *mdrun* accepts, as a complete input pack, the output of operations
+such as *modify_input* or *read_tpr*. Such a standardized pack is defined by a
+consistent set of data names and types.
+
+Note that *simulation_state* is a mutable internal aspect of *mdrun* that must
+be checkpointed, but that is a detail of the operation implementation in a
+particular Context. Its exposure in the work graph indicates the immutable data
+with which the operation is initialized when the initial work graph state is
+established.
+
 .. todo:: Revise definition of simulation input data wrt microstate vs. molecular force field.
 
    We had previously tentatively settled on the following components of the data
@@ -660,8 +672,6 @@ calculated by the Context with help from the Operation definition.
    higher level model information,
    but it is not clear how best to divide information on atom typing, bonds,
    force field parameters, and additional force field metadata.
-
-
 
 Deserialization heuristics
 --------------------------
