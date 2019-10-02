@@ -41,6 +41,16 @@ endif()
 # This needs to be set before project() in order to pick up toolchain files
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Platform)
 
+# OS X deployment target should be >=10.9 for modern C++ compatibility.
+# Reference https://scikit-build.readthedocs.io/en/latest/generators.html#macosx
+# and https://github.com/MacPython/wiki/wiki/Spinning-wheels
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.9 CACHE STRING
+    "OS X deployment target below 10.9 does not use modern standard library"
+    FORCE)
+set(CMAKE_OSX_ARCHITECTURES x86_64 CACHE STRING
+    "OS X should build Python package for 64-bit architecture"
+    FORCE)
+
 project(Gromacs)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -95,6 +105,8 @@ endif()
 set(build_types_with_explicit_flags RELEASE DEBUG RELWITHDEBINFO RELWITHASSERT MINSIZEREL PROFILE)
 
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
+
+add_subdirectory(src/external/pybind/pybind)
 
 include(gmxCTestUtilities)
 gmx_ctest_init()
