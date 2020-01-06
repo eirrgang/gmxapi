@@ -948,4 +948,5 @@ SignallerCallbackPtr ModularSimulator::SignalHelper::registerNSCallback()
     return std::make_unique<SignallerCallback>(
             [this](Step step, Time gmx_unused time) { this->nextNSStep_ = step; });
 }
+
 } // namespace gmx

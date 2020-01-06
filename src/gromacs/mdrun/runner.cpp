@@ -1549,12 +1549,9 @@ int Mdrunner::mdrunner()
                             domdecOptions.checkBondedInteractions, fr->cginfo_mb);
         }
 
-        const bool inputIsCompatibleWithModularSimulator = ModularSimulator::isInputCompatible(
+        const bool useModularSimulator = checkUseModularSimulator(
                 false, inputrec, doRerun, vsite.get(), ms, replExParams, fcd,
                 static_cast<int>(filenames.size()), filenames.data(), &observablesHistory, membed);
-
-        const bool useModularSimulator = inputIsCompatibleWithModularSimulator
-                                         && !(getenv("GMX_DISABLE_MODULAR_SIMULATOR") != nullptr);
 
         // TODO This is not the right place to manage the lifetime of
         // this data structure, but currently it's the easiest way to
@@ -1596,9 +1593,8 @@ int Mdrunner::mdrunner()
 
         // build and run simulator object based on user-input
         auto simulator = simulatorBuilder.build(
-                inputIsCompatibleWithModularSimulator, fplog, cr, ms, mdlog,
-                static_cast<int>(filenames.size()), filenames.data(), oenv, mdrunOptions,
-                startingBehavior, vsite.get(), constr.get(),
+                useModularSimulator, fplog, cr, ms, mdlog, static_cast<int>(filenames.size()),
+                filenames.data(), oenv, mdrunOptions, startingBehavior, vsite.get(), constr.get(),
                 enforcedRotation ? enforcedRotation->getLegacyEnfrot() : nullptr, deform.get(),
                 mdModules_->outputProvider(), mdModules_->notifier(), inputrec, imdSession.get(),
                 pull_work, swap, &mtop, fcd, globalState.get(), &observablesHistory, mdAtoms.get(),
