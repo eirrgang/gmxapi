@@ -1,7 +1,7 @@
 /*
  * This file is part of the GROMACS molecular simulation package.
  *
- * Copyright (c) 2015,2017,2018,2019, by the GROMACS development team, led by
+ * Copyright (c) 2015,2017-2020, by the GROMACS development team, led by
  * Mark Abraham, David van der Spoel, Berk Hess, and Erik Lindahl,
  * and including many others, as listed in the AUTHORS file in the
  * top-level source directory and at http://www.gromacs.org.
@@ -53,6 +53,7 @@
 #include "gromacs/hardware/hw_info.h"
 #include "gromacs/math/vec.h"
 #include "gromacs/mdrun/mdmodules.h"
+#include "gromacs/mdrun/simulationinput_fwd.h"
 #include "gromacs/mdrunutility/handlerestart.h"
 #include "gromacs/mdtypes/mdrunoptions.h"
 #include "gromacs/utility/basedefinitions.h"
@@ -587,6 +588,14 @@ public:
      * \param builder
      */
     MdrunnerBuilder& addStopHandlerBuilder(std::unique_ptr<StopHandlerBuilder> builder);
+
+    /*!
+     * \brief Acquire a handle to the SimulationInput.
+     *
+     * \param input shared ownership of a SimulationInput handle.
+     * \return
+     */
+    MdrunnerBuilder& addInput(SimulationInputHolder input);
 
     ~MdrunnerBuilder();
 

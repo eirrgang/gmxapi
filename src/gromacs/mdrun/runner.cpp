@@ -163,6 +163,7 @@
 #include "isimulator.h"
 #include "replicaexchange.h"
 #include "simulatorbuilder.h"
+#include "simulationinput.h"
 
 #if GMX_FAHCORE
 #    include "corewrap.h"
@@ -2165,6 +2166,11 @@ MdrunnerBuilder& MdrunnerBuilder::addLogFile(t_fileio* logFileHandle)
 MdrunnerBuilder& MdrunnerBuilder::addStopHandlerBuilder(std::unique_ptr<StopHandlerBuilder> builder)
 {
     impl_->addStopHandlerBuilder(std::move(builder));
+    return *this;
+}
+MdrunnerBuilder& MdrunnerBuilder::addInput(SimulationInputHolder input)
+{
+    (void)input;
     return *this;
 }
 
