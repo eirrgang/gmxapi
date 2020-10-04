@@ -26,9 +26,10 @@ compiler: gcc
 
 env:
 # Python 2.7 and 3.6 are the only generations provided by pyenv on Travis-CI out-of-the-box
-  - CI_MPI=0 PY=3.6
-  - CI_MPI=0 PY=3.7
-  - CI_MPI=0 PY=3.8
+  - CI_MPI=0 PY=3.6 GROMACS=2020
+  - CI_MPI=0 PY=3.6 GROMACS=2021
+  - CI_MPI=0 PY=3.7 GROMACS=2021
+  - CI_MPI=0 PY=3.8 GROMACS=2021
 
 addons:
   apt:
@@ -71,7 +72,7 @@ before_install:
 install:
   - export CCACHE_DIR=$HOME/.ccache_gmxapi
   - ccache -s
-  - ./ci_scripts/install_gromacs_2020.sh
+  - ./ci_scripts/install_gromacs_$GROMACS.sh
 
 before_script:
   - export CCACHE_DIR=$HOME/.ccache_gmxapi
@@ -79,6 +80,6 @@ before_script:
   - ./ci_scripts/prepare_python.sh
 
 script:
-  - source $HOME/install/gromacs_2020/bin/GMXRC && ./ci_scripts/test_installers.sh
-  - source $HOME/install/gromacs_2020/bin/GMXRC && ./ci_scripts/pygmx.sh
-  - source $HOME/install/gromacs_2020/bin/GMXRC && ./ci_scripts/sample_restraint.sh
+  - source $HOME/install/gromacs_$GROMACS/bin/GMXRC && ./ci_scripts/test_installers.sh
+  - source $HOME/install/gromacs_$GROMACS/bin/GMXRC && ./ci_scripts/pygmx.sh
+  - source $HOME/install/gromacs_$GROMACS/bin/GMXRC && ./ci_scripts/sample_restraint.sh
