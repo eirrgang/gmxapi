@@ -121,22 +121,25 @@ def remove_tempdir(request) -> RmOption:
 @pytest.fixture(scope='session')
 def gmxconfig():
     try:
-        from importlib.resources import open_text
-        with open_text('gmxapi', 'gmxconfig.json') as textfile:
-            config = json.load(textfile)
-    except ImportError:
-        # TODO: Remove this when we require Python 3.7
         try:
-            # A backport of importlib.resources is available as importlib_resources
-            # with a somewhat different interface.
-            from importlib_resources import files, as_file
-
-            source = files('gmxapi').joinpath('gmxconfig.json')
-            with as_file(source) as gmxconfig:
-                with open(gmxconfig, 'r') as fp:
-                    config = json.load(fp)
+            from importlib.resources import open_text
+            with open_text('gmxapi', 'gmxconfig.json') as textfile:
+                config = json.load(textfile)
         except ImportError:
-            config = None
+            # TODO: Remove this when we require Python 3.7
+            try:
+                # A backport of importlib.resources is available as importlib_resources
+                # with a somewhat different interface.
+                from importlib_resources import files, as_file
+
+                source = files('gmxapi').joinpath('gmxconfig.json')
+                with as_file(source) as gmxconfig:
+                    with open(gmxconfig, 'r') as fp:
+                        config = json.load(fp)
+            except ImportError:
+                config = None
+    except FileNotFoundError:
+        config = None
     yield config
 
 @pytest.fixture(scope='session')
